@@ -2,10 +2,6 @@
 from base import BaseRequestHandler
 
 STATISTICS_PAGE_API_PATH = {
-    'top_stats': '/reddripETC/top_stats',
-    'detect_trend': '/reddripETC/detect_trend',
-    'summary': '/reddripETC/summary',
-    'upload_trend': '/reddripETC/upload_trend',
 }
 
 res = {}
