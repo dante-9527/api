@@ -19,25 +19,27 @@ class RequestBody(object):
 
 
 class BaseRequestHandler(object):
-    def __init__(self, host, headers_info=None, body_info=None):
+    def __init__(self, host: str, headers_info: dict = None, body_info: dict = None):
         self.host = host
-        self.headers_info = headers_info
-        self.body_info = body_info
+        if headers_info:
+            self.headers = RequestHeaders(headers_info)
+        else:
+            self.headers = {'Content-Type': 'application/json'}
+        if body_info:
+            self.body = RequestBody(body_info)
 
     def _make_request_headers(self):
         """构造请求头"""
-        if self.headers_info:
-            headers_object = RequestHeaders(self.headers_info)
-            headers = headers_object.as_headers()
+        if isinstance(self.headers, RequestHeaders):
+            headers = self.headers.as_headers()
         else:
-            headers = {'Content-Type': 'application/json'}
+            headers = self.headers
         return headers
 
     def _make_request_body(self):
         """构造请求体"""
-        if self.body_info:
-            body_object = RequestBody(self.body_info)
-            body = body_object.as_body()
+        if isinstance(self.body, RequestBody):
+            body = self.body.as_body()
         else:
             body = {}
         return body
@@ -54,11 +56,12 @@ class BaseRequestHandler(object):
                     response = getattr(requests, 'get')(url=url, params=request_body, headers=headers)
                 elif request_method == 'POST':
                     response = getattr(requests, 'post')(url=url, json=request_body, headers=headers)
+                res = self._handler_res(response)
                 break
             except Exception as e:
                 print(e)
                 retry_times += 1
-        return response
+        return res
 
     @staticmethod
     def _handler_res(res):
@@ -67,7 +70,7 @@ class BaseRequestHandler(object):
         return res_data
 
     def request_get(self, url):
-        return self._request(url, request_method='GET')
+        return self._request(url)
 
     def request_post(self, url):
         return self._request(url, request_method='POST')
